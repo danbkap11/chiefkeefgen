@@ -1,10 +1,11 @@
 (
 var root, compose, config, assertions, signatures, seeds, baseline, plan, failures, signature, arrangementPlan;
+try {
 root = (PathName(thisProcess.nowExecutingPath).pathOnly +/+ "..").standardizePath;
 compose = thisProcess.interpreter.executeFile(root +/+ "lib" +/+ "Compose.scd");
 config = thisProcess.interpreter.executeFile(root +/+ "lib" +/+ "Config.scd");
 assertions = 0;
-signatures = IdentitySet.new;
+signatures = Set.new;
 seeds = (1..100);
 seeds.do { |seed|
 	[\A, \B].do { |arrangement|
@@ -43,4 +44,6 @@ if(signatures.size < 80) { Error("only % distinct musical signatures in 100 seed
 assertions = assertions + 1;
 [130, 140, 150].do { |tempo| config[\validate].value((tempo: tempo, activity: 0.5, intensity: 0.55)); assertions = assertions + 1 };
 "PLAN TESTS PASSED: % assertions; 100 seeds; % distinct signatures".format(assertions, signatures.size).postln;
+0.exit;
+} { |error| error.reportError; 1.exit };
 )

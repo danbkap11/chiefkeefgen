@@ -1,0 +1,106 @@
+SC FFT global init: cosTable initialised.
+compiling class library...
+	Found 723 primitives.
+	Compiling directory '/tmp/chiefkeefgen-sc3141/install/share/SuperCollider/SCClassLibrary'
+	Compiling directory '/tmp/chiefkeefgen-sc3141/install/share/SuperCollider/Extensions'
+	Compiling directory '/tmp/chiefkeefgen-sc3141/data/SuperCollider/Extensions'
+	numentries = 688975 / 7486500 = 0.092
+	4025 method selectors, 1860 classes
+	method table size 9966584 bytes, big table size 59892000
+	Number of Symbols 9393
+	Byte Code Size 272048
+	compiled 229 files in 0.16 seconds
+
+Info: 4 methods are currently overwritten by extensions. To see which, execute:
+MethodOverride.printAll
+
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+Couldn't set realtime scheduling priority 1: Operation not permitted
+Class tree inited in 0.01 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help type ctrl-c ctrl-h (Emacs) or :SChelp (vim).
+Couldn't set realtime scheduling priority 1: Operation not permitted
+SC FFT global init: cosTable initialised.
+start time 0
+nextOSCPacket 0
+nextOSCPacket 0.05
+nextOSCPacket 0.1
+nextOSCPacket 0.314286
+nextOSCPacket 0.528571
+nextOSCPacket 0.742857
+nextOSCPacket 0.85
+nextOSCPacket 0.957143
+nextOSCPacket 1.17143
+nextOSCPacket 1.38571
+nextOSCPacket 1.6
+nextOSCPacket 1.81429
+nextOSCPacket 2.02857
+nextOSCPacket 2.24286
+nextOSCPacket 2.45714
+nextOSCPacket 2.67143
+nextOSCPacket 2.88571
+nextOSCPacket 2.99286
+nextOSCPacket 3.1
+nextOSCPacket 3.31429
+nextOSCPacket 3.52857
+nextOSCPacket 3.74286
+nextOSCPacket 3.95714
+nextOSCPacket 4.17143
+nextOSCPacket 4.27857
+nextOSCPacket 4.38571
+nextOSCPacket 4.6
+nextOSCPacket 4.81429
+nextOSCPacket 5.02857
+nextOSCPacket 5.24286
+nextOSCPacket 5.45714
+nextOSCPacket 5.67143
+nextOSCPacket 5.88571
+nextOSCPacket 6.1
+nextOSCPacket 6.31429
+nextOSCPacket 6.42143
+nextOSCPacket 6.52857
+nextOSCPacket 6.74286
+nextOSCPacket 6.95714
+nextOSCPacket 7.17143
+nextOSCPacket 7.38571
+nextOSCPacket 7.6
+nextOSCPacket 7.70714
+nextOSCPacket 7.81429
+nextOSCPacket 8.02857
+nextOSCPacket 8.24286
+nextOSCPacket 8.45714
+nextOSCPacket 8.67143
+nextOSCPacket 8.88571
+nextOSCPacket 9.1
+nextOSCPacket 9.31429
+nextOSCPacket 9.52857
+nextOSCPacket 9.74286
+nextOSCPacket 9.85
+nextOSCPacket 9.95714
+nextOSCPacket 10.1714
+nextOSCPacket 10.3857
+nextOSCPacket 10.6
+nextOSCPacket 10.8143
+nextOSCPacket 11.0286
+nextOSCPacket 11.1357
+nextOSCPacket 11.2429
+nextOSCPacket 11.4571
+nextOSCPacket 11.6714
+nextOSCPacket 11.8857
+nextOSCPacket 12.1
+nextOSCPacket 12.3143
+nextOSCPacket 12.5286
+nextOSCPacket 12.7429
+nextOSCPacket 12.9571
+nextOSCPacket 13.1714
+nextOSCPacket 13.2786
+nextOSCPacket 13.3857
+nextOSCPacket 13.6
+nextOSCPacket 15.8143
+nextOSCPacket 15.8143
+NRT renderer exited 0; 170 voices; expected duration 15.814285714286 seconds
+main: quit request 0
+cleaning up OSC

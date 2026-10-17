@@ -31,8 +31,8 @@ inspectManifest = { |projectRoot|
 	roles.do { |item| byRole[item] = Array.new };
 	if(File.exists(manifestPath).not) {
 		"Optional assets/manifest.tsv not found; using synthesized sounds.".postln;
-		^((entries: [], byRole: byRole, identity: "synth-core-v1", errors: []))
-	};
+		(entries: [], byRole: byRole, identity: "synth-core-v1", errors: [])
+	} {
 	file = File(manifestPath, "r");
 	if(file.isOpen.not) { Error("cannot read %".format(manifestPath)).throw };
 	header = file.getLine;
@@ -90,7 +90,7 @@ inspectManifest = { |projectRoot|
 					asset[\gain] = gain.dbamp;
 					asset[\sha256] = digest;
 					uniqueIds.add(fields[0]);
-					parsedRows.add(asset)
+					parsedRows = parsedRows.add(asset)
 				} { |error|
 					"Optional sample row rejected: %".format(error.errorString).warn
 				}
@@ -99,16 +99,17 @@ inspectManifest = { |projectRoot|
 		line = file.getLine
 	};
 	file.close;
-	parsedRows.sort { |a, b| a[\assetId] < b[\assetId] }.do { |item| byRole[item[\role]].add(item) };
+	parsedRows.sort { |a, b| a[\assetId] < b[\assetId] }.do { |item| byRole[item[\role]] = byRole[item[\role]].add(item) };
 	rows = parsedRows.collect { |item| [item[\assetId], item[\sha256], item[\role].asString] };
 	((entries: parsedRows, byRole: byRole, identity: rows.asCompileString, errors: []))
+	}
 };
 
 attachCatalog = { |plan, catalog, composeApi|
 	var catalogById, identities, entries, role, candidates;
 	catalogById = IdentityDictionary.new;
 	entries = Array.new;
-	catalog[\entries].do { |item| catalogById[item[\assetId]] = item; entries.add(item) };
+	catalog[\entries].do { |item| catalogById[item[\assetId]] = item; entries = entries.add(item) };
 	plan[\bars].do { |bar|
 		bar[\candidates].do { |item|
 			var choices;

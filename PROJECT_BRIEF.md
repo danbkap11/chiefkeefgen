@@ -1,6 +1,6 @@
 # Chief Keef type beat generator — implementation brief
 
-Status (2026-10-17): implementation modules, launch block, synthesized palette, optional asset importer, and a pure-plan test script now exist. SuperCollider execution remains untested because this host lacks `sclang` and `scsynth`; see README.md and `test-results/current-run.md`. Target: SuperCollider **3.14.1**, standard class library and standard scsynth UGens.
+Status (2026-10-17, v0.1.1): application modules and launch block now compile under source-built SuperCollider **3.14.1**. Startup, multi-seed plan checks, an eight-bar NRT waveform check, and a headless real-time lifecycle smoke test have passed. Full acceptance, visible GUI/device, and listening sign-off remain incomplete; see README.md and `test-results/current-run.md`.
 
 ## Intended result
 
@@ -12,7 +12,7 @@ There is no universal Chief Keef song structure. This project uses constrained p
 
 ## Evidence and current limitations
 
-The checkout contained the design handoff without application code. SuperCollider's 3.14.1 release page, tagged help files, and selected tagged class implementations were retrieved for the design. Neither `sclang` nor `scsynth` is installed in the current machine. No SuperCollider execution, audio render, GUI interaction, or listening comparison has been performed.
+The checkout initially contained the design handoff without application code. Matching 3.14.1 language/server binaries have now been built from the official source release for headless validation. An eight-bar NRT render and real-time output capture using JACK's dummy backend were checked numerically. No visible GUI interaction, physical audio-device check, or listening comparison has been performed.
 
 Requests to music research/search destinations including Google, Sound On Sound, Red Bull, FACT, YouTube, and Wikipedia were denied by the environment's network proxy. Consequently, this handoff does **not** claim newly verified producer interviews, track transcriptions, BPM measurements, or listening results. The musical specification is an informed proposal with explicit reference-listening and primary-source verification tasks. Technical source verification and musical source verification have different statuses.
 

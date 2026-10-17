@@ -10,9 +10,21 @@ The window has exactly three musical controls: Tempo (130–150 BPM, default 140
 
 ## Layout
 
-`lib/` contains the configuration, composition, synth palette, asset importer, GUI, and lifecycle engine. `assets/manifest.tsv` is intentionally header-only. `tests/plan_tests.scd` is the standalone pure-plan test script; runtime, rendering, GUI, lifecycle stress, and listening checks are tracked in `ACCEPTANCE_TESTS.md`.
+`lib/` contains the configuration, composition, synth palette, asset importer, GUI, and lifecycle engine. `assets/manifest.tsv` is intentionally header-only. The test scripts below use the production compiler, SynthDefs, message adapter, and engine. The complete acceptance scope is tracked in `ACCEPTANCE_TESTS.md`.
 
-From the repository root, run the pure suite with `sclang tests/plan_tests.scd`. Use only a matching 3.14.1 language and server for the complete acceptance plan. This handoff includes no claim that SuperCollider source/runtime, NRT audio, GUI/device behavior, or listening has passed: the current execution host has no `sclang` or `scsynth`, and the official 3.14.1 release page has no Linux binary. See `test-results/current-run.md` for checks actually performed and blocked suites.
+From the repository root with matching 3.14.1 language/server binaries installed:
+
+```sh
+sclang -D tests/startup_tests.scd
+sclang -D tests/plan_tests.scd
+sclang -D tests/render_smoke.scd
+python3 tests/check_wav.py test-results/startup-fix/smoke.wav 15.814285714286
+sclang -D tests/lifecycle_smoke.scd
+```
+
+The lifecycle script boots its own server on UDP port 57141 and needs a working server backend. Linux CI used JACK's dummy backend, with no physical audio device. Each SuperCollider script exits nonzero on failure; use a shell timeout for boot/device failures.
+
+Version 0.1.1 has passed 48 startup assertions, 604 plan assertions over 100 seeds, an eight-bar NRT waveform check, and 21 headless lifecycle assertions using a source-built SuperCollider 3.14.1. These checks do not cover the complete acceptance matrix. Visible Qt/macOS interaction, physical audio output, full-song/extreme-control rendering, full ownership stress, optional sample fixtures, and listening remain unrun. See `test-results/current-run.md` and its linked logs.
 
 ## Supported musical choices
 

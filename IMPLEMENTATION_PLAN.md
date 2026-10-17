@@ -1,6 +1,6 @@
 # Ordered implementation plan for Luna
 
-Implementation record (2026-10-17): the app modules, launch block, synthesized palette, optional asset importer, and README now exist in this checkout. The exact SuperCollider runtime is unavailable on this host, so runtime-dependent plan, audio, lifecycle, GUI, and listening milestones remain blocked/unrun; see `test-results/current-run.md`. Do not mark a milestone complete merely because its source files exist.
+Implementation record (2026-10-17, v0.1.1): matching SuperCollider 3.14.1 language/server binaries were built from the official source release. Startup, basic plan invariants/determinism/diversity, an eight-bar NRT waveform check, and headless lifecycle smoke checks now pass. The complete milestones below remain the acceptance target; full audio matrices, full lifecycle stress, optional asset fixtures, visible GUI/device checks, and listening review are still incomplete. See `test-results/current-run.md` for actual executed counts.
 
 ## 1. Establish the exact runtime
 

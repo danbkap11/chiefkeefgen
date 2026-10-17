@@ -4,6 +4,8 @@
 
 Use a **pure seeded song compiler followed by a single bar-aware playback Routine on a private TempoClock**. The compiler builds a complete, finite arrangement of candidate events. Playback filters candidates using the current controls and sends timestamped OSC bundles. It does not compose notes with live random streams.
 
+Implementation notes for 0.1.1: `Compose.scd` exposes `compile`, `validatePlan`, `canonical`, and `barView`; the small Arrange function lives in that module. `Sound.scd` exposes `definitions` and `makeMessage`; `Assets.scd` exposes `inspectManifest`, `attachCatalog`, `loadBuffers`, and `release`. Engine's `newBeat` implements the regeneration request. The interface table below preserves the original design names; README/test scripts use these actual entry points. GUI operations are deferred to AppClock. Open hats have a dedicated subgroup, and forced-release bundles target owned groups so finite voices expiring before the bundle timestamp do not produce stale-node errors. Scoped Stop still drains queued bundles before releasing the groups and buses.
+
 Patterns/Pbind are good general-purpose sequencing tools, but several independently randomized streams make cross-part composition, repeatable fingerprints, bar commits, and cancellation harder to inspect here. A server-side step sequencer would add coordination and GUI synchronization work. One explicit timeline is the smaller architecture for this constrained generator. No external extensions are needed.
 
 ```mermaid

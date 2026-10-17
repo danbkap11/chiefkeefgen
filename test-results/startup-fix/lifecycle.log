@@ -1,0 +1,48 @@
+SC FFT global init: cosTable initialised.
+compiling class library...
+	Found 723 primitives.
+	Compiling directory '/tmp/chiefkeefgen-sc3141/install/share/SuperCollider/SCClassLibrary'
+	Compiling directory '/tmp/chiefkeefgen-sc3141/install/share/SuperCollider/Extensions'
+	Compiling directory '/tmp/chiefkeefgen-sc3141/data/SuperCollider/Extensions'
+	numentries = 688975 / 7486500 = 0.092
+	4025 method selectors, 1860 classes
+	method table size 9966584 bytes, big table size 59892000
+	Number of Symbols 9393
+	Byte Code Size 272048
+	compiled 229 files in 0.18 seconds
+
+Info: 4 methods are currently overwritten by extensions. To see which, execute:
+MethodOverride.printAll
+
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+Couldn't set realtime scheduling priority 1: Operation not permitted
+Class tree inited in 0.01 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help type ctrl-c ctrl-h (Emacs) or :SChelp (vim).
+Couldn't set realtime scheduling priority 1: Operation not permitted
+ckgSmoke : setting clientID to 0.
+Booting server 'ckgSmoke' on address 127.0.0.1:57141.
+Cannot lock down 107341340 byte memory area (Cannot allocate memory)
+SC FFT global init: cosTable initialised.
+JackDriver: client name is 'SuperCollider'
+SC_AudioDriver: sample rate = 48000.000000, driver's block size = 256
+JackDriver: connected  SuperCollider:out_1 to system:playback_1
+JackDriver: connected  SuperCollider:out_2 to system:playback_2
+SuperCollider 3 server ready.
+JackDriver: max output latency 10.7 ms
+Requested notification messages from server 'ckgSmoke'
+ckgSmoke: server process's maxLogins (1) matches with my options.
+ckgSmoke: keeping clientID (0) as confirmed by server process.
+Shared memory server interface initialized
+Couldn't set realtime scheduling priority 1: Operation not permitted
+REAL-TIME CAPTURE: peak 0.04132242873311; 96000 samples
+Couldn't set realtime scheduling priority 1: Operation not permitted
+LIFECYCLE SMOKE PASSED: 21 assertions
+server 'ckgSmoke' disconnected shared memory interface
+'/quit' message sent to server 'ckgSmoke'.
+Server 'ckgSmoke' exited with exit code 0.
+main: quit request 0
+cleaning up OSC

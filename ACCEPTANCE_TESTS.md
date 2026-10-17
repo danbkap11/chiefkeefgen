@@ -1,6 +1,6 @@
 # Acceptance and validation specification
 
-Status at implementation (2026-10-17): **all SuperCollider application checks remain unrun** because the host has no `sclang` or `scsynth` and the checked official 3.14.1 release page has no Linux binary. Application code and the standalone plan test script now exist. Official API source inspection is completed separately in ARCHITECTURE.md. See `test-results/current-run.md`; source presence is not a test pass.
+Status (2026-10-17, v0.1.1): real 3.14.1 startup checks, a subset of P1, an eight-bar A1 smoke render, and a subset of R1/lifecycle checks have passed. Matching headless binaries were built from the official source release. The complete suites below have not all passed. See `test-results/current-run.md` for counts, logs, and remaining checks.
 
 ## Test harness and evidence
 
@@ -9,12 +9,14 @@ Use standalone `sclang` test scripts, not a required third-party test framework.
 Suggested CLI interfaces to implement from the repository root:
 
 ```text
+sclang -D tests/startup_tests.scd
 sclang -D tests/plan_tests.scd
-sclang -D tests/render.scd
-sclang -D tests/lifecycle.scd
+sclang -D tests/render_smoke.scd
+python3 tests/check_wav.py test-results/startup-fix/smoke.wav 15.814285714286
+sclang -D tests/lifecycle_smoke.scd
 ```
 
-`tests/plan_tests.scd` is implemented but not executed here. Render and lifecycle scripts remain planned entry points and are not present yet. On desktop use the IDE for main.scd and the manual procedures below. If a headless Qt build needs an offscreen platform for language tests, document that host-specific setup; it does not prove the visible GUI works. Never disable security/sandbox checks to obtain a passing result.
+These implemented runners have been executed under matching 3.14.1 binaries. They are regression/smoke checks, not the whole acceptance matrix below. The lifecycle runner requires an available backend; Linux CI used JACK dummy. On desktop use the IDE for main.scd and the manual procedures below. Headless execution does not prove that the visible GUI or physical audio device works.
 
 Runners must terminate with 0 only after their selected checks complete and with nonzero on assertion failure, timeout, boot/render failure, or missing required results. Shell wrappers must preserve underlying status. Don't swallow errors in an always-successful callback or silently reduce a failing suite to zero tests. Set test timeouts; allow initial boot up to 20 s, per-file optional loading up to 10 s, and NRT rendering up to 180 s for a full song on the reference host, reporting a resource limit if exceeded.
 

@@ -2,10 +2,10 @@
 var makeEngine, api;
 makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsApi, uiApi|
 	var config, server, app, state, plan, pendingPlan, buffers, catalog, activeControls, pendingControls;
-	var rootGroup, sourceGroup, drumsGroup, bassGroup, musicGroup, masterGroup, buses, masterSynth;
+	var rootGroup, sourceGroup, drumsGroup, openHatGroup, bassGroup, musicGroup, masterGroup, buses, masterSynth;
 	var clock, playRoutine, activeNodes, openHatNodes, playToken, generationToken, loadToken;
 	var barIndex, disposed, stopRequested, currentError, window, cmdHook, quitHook, appSeed;
-		var eventSerial, transportRoutineCount, compilePending, stopWaiters, startPlayer, finishGraph;
+	var eventSerial, transportRoutineCount, compilePending, stopWaiters, startPlayer, finishGraph;
 
 	config = configApi[\validate].value(rawConfig);
 	server = config[\server];
@@ -19,7 +19,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 	activeControls[\activity] = config[\activity];
 	activeControls[\intensity] = config[\intensity];
 	pendingControls = nil;
-	rootGroup = nil; sourceGroup = nil; drumsGroup = nil; bassGroup = nil; musicGroup = nil;
+	rootGroup = nil; sourceGroup = nil; drumsGroup = nil; openHatGroup = nil; bassGroup = nil; musicGroup = nil;
 	masterGroup = nil; buses = IdentityDictionary.new; masterSynth = nil;
 	clock = nil; playRoutine = nil; activeNodes = Array.new; openHatNodes = Array.new;
 	playToken = 0; generationToken = 0; loadToken = 0;
@@ -30,7 +30,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 
 	app = IdentityDictionary.new;
 	app[\projectRoot] = projectRoot.standardizePath;
-	app[\version] = "0.1.0";
+	app[\version] = "0.1.1";
 	app[\seed] = nil;
 	app[\state] = { state };
 	app[\snapshot] = {
@@ -43,7 +43,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 			var index, bar;
 			index = if(plan[\bars].notEmpty) { barIndex % plan[\bars].size } { 0 };
 			bar = if(plan[\bars].notEmpty) { plan[\bars][index] } { nil };
-			if(bar.notNil) { "% %/%".format(bar[\sectionType].asString.capitalize, (bar[\localBar] + 1), plan[\sections][bar[\sectionId]][\bars]) } { "—" }
+			if(bar.notNil) { "% %/%".format(bar[\sectionType].asString.toUpper, (bar[\localBar] + 1), plan[\sections][bar[\sectionId]][\bars]) } { "—" }
 		} { "—" };
 		output[\bar] = if(plan.notNil) { (barIndex % plan[\bars].size) + 1 } { 0 };
 		output[\totalBars] = if(plan.notNil) { plan[\bars].size } { 0 };
@@ -58,7 +58,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 		output[\schedulerCount] = if(playRoutine.notNil and: { playRoutine.isPlaying }) { 1 } { 0 };
 		output
 	};
-	app[\refresh] = { if(uiApi.notNil) { uiApi[\refresh].value(app) } };
+	app[\refresh] = { if(uiApi.notNil) { { uiApi[\refresh].value(app) }.defer } };
 
 	app[\setPending] = { |control, value|
 		var updated, validated;
@@ -87,6 +87,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 			rootGroup = Group.tail(server.defaultGroup);
 			sourceGroup = Group.tail(rootGroup);
 			drumsGroup = Group.tail(sourceGroup);
+			openHatGroup = Group.tail(drumsGroup);
 			bassGroup = Group.tail(sourceGroup);
 			musicGroup = Group.tail(sourceGroup);
 			masterGroup = Group.tail(rootGroup);
@@ -109,7 +110,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 		context[\assets] = buffers;
 		message = soundApi[\makeMessage].value(event, context, plan);
 		target = if([\kick, \snare, \clap, \hatClosed, \hatOpen, \perc, \cymbal].includes(message[\role])) {
-			drumsGroup
+			if(message[\role] == \hatOpen) { openHatGroup } { drumsGroup }
 		} { if(message[\role] == \bass) { bassGroup } { musicGroup } };
 		node = Synth(message[\patch], message[\controls], target, \addToTail);
 		NodeWatcher.register(node);
@@ -125,8 +126,9 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 				state = \playing;
 				currentError = "";
 				barIndex = 0;
-				clock = TempoClock(activeControls[\tempo] / 60, 0, 4);
+				clock = TempoClock(activeControls[\tempo] / 60);
 				clock.permanent = false;
+				masterSynth.set(\enabled, 1);
 				run = Routine({
 					var renderedBar, previousTick, uniqueTicks;
 					transportRoutineCount = transportRoutineCount + 1;
@@ -137,13 +139,12 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 							clock.tempo = activeControls[\tempo] / 60
 						};
 						if(pendingPlan.notNil) {
-							var oldNodes;
 							plan = pendingPlan;
 							pendingPlan = nil;
 							barIndex = 0;
-							oldNodes = activeNodes.copy;
-							server.makeBundle(server.latency, { oldNodes.do { |oldNode| oldNode.set(\gate, -1.03) } });
-							activeNodes = oldNodes
+						// Set the owned group at execution time: individual finite voices
+						// can expire between dispatch and the bundle's future timestamp.
+						server.makeBundle(server.latency, { sourceGroup.set(\gate, -1.03) })
 						};
 						activeNodes = activeNodes.reject { |node| node.isPlaying.not };
 						openHatNodes = openHatNodes.reject { |node| node.isPlaying.not };
@@ -156,7 +157,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 							groupEvents = renderedBar.select { |event| event[\tick] == eventTick };
 							server.makeBundle(server.latency, {
 								if(groupEvents.any { |event| event[\role] == \hatClosed }) {
-									openHatNodes.do { |node| node.set(\gate, -1.01) };
+								openHatGroup.set(\gate, -1.01);
 									openHatNodes = Array.new
 								};
 								groupEvents.do { |event| app[\sendEvent].value(event, activeControls[\tempo], activeControls[\intensity]) }
@@ -171,7 +172,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 				});
 				playRoutine = run;
 				run.play(clock, 0);
-				app[\refresh].value
+				app[\refresh].value;
 				true
 			} { false }
 		};
@@ -180,12 +181,12 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 			if(server.serverRunning and: { rootGroup.notNil }) { rootGroup.free; server.sync };
 			buses.values.do { |bus| bus.free };
 			buses = IdentityDictionary.new;
-			rootGroup = nil; sourceGroup = nil; drumsGroup = nil; bassGroup = nil; musicGroup = nil;
+			rootGroup = nil; sourceGroup = nil; drumsGroup = nil; openHatGroup = nil; bassGroup = nil; musicGroup = nil;
 			masterGroup = nil; masterSynth = nil;
 			activeNodes = Array.new; openHatNodes = Array.new;
 			if(disposed.not) { state = finalState; app[\refresh].value };
 			stopWaiters.copy.do(_.value);
-			stopWaiters.clear
+			stopWaiters = Array.new
 		};
 
 		app[\start] = {
@@ -194,6 +195,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 			if([\playing, \starting].includes(state)) { nil } {
 				if(state == \loading) { stopRequested = false; "Play is queued until initialization finishes.".postln } {
 					if(state == \ready) {
+						stopRequested = false;
 						state = \starting;
 						playToken = playToken + 1;
 						token = playToken;
@@ -226,7 +228,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 		if([\starting, \playing, \stopping].includes(state)) {
 			if(state == \playing) {
 				state = \stopping;
-				stopWaiters.add(callback);
+				stopWaiters = stopWaiters.add(callback);
 				playToken = playToken + 1;
 				if(playRoutine.notNil) { playRoutine.stop; playRoutine = nil; transportRoutineCount = 0 };
 				if(clock.notNil) { clock.stop; clock = nil };
@@ -237,7 +239,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 					finishGraph.value(if(disposed) { \disposed } { \ready })
 				}).play(SystemClock)
 			} {
-				stopWaiters.add(callback);
+				stopWaiters = stopWaiters.add(callback);
 				if(state == \starting) { state = \stopping; playToken = playToken + 1; app[\refresh].value }
 			}
 		} { callback.value }
@@ -293,8 +295,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 			loadToken = loadToken + 1;
 			if(cmdHook.notNil) { CmdPeriod.remove(cmdHook); cmdHook = nil };
 			if(quitHook.notNil) { ServerQuit.remove(quitHook, server); quitHook = nil };
-			if(window.notNil and: { window.isClosed.not }) { window.close };
-			if(uiApi.notNil) { uiApi[\close].value(app) };
+			if(uiApi.notNil) { { uiApi[\close].value(app) }.defer };
 			window = nil;
 			if([\starting, \playing, \stopping].includes(priorState)) {
 				state = priorState;
@@ -311,7 +312,7 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 		app
 	};
 
-	app[\openUI] = { window = uiApi[\open].value(app); window };
+	app[\openUI] = { { if(disposed.not) { window = uiApi[\open].value(app) } }.defer; nil };
 	app[\isCurrentLoad] = { |token| (token == loadToken) and: { disposed.not } };
 	app[\initialize] = {
 		var token, booted;
@@ -350,29 +351,29 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 								playToken = playToken + 1;
 								if(playRoutine.notNil) { playRoutine.stop; playRoutine = nil };
 								if(clock.notNil) { clock.stop; clock = nil };
-								rootGroup = nil; sourceGroup = nil; drumsGroup = nil; bassGroup = nil; musicGroup = nil;
+								rootGroup = nil; sourceGroup = nil; drumsGroup = nil; openHatGroup = nil; bassGroup = nil; musicGroup = nil;
 								masterGroup = nil; masterSynth = nil;
 								buses.values.do(_.free); buses = IdentityDictionary.new;
 								activeNodes = Array.new; openHatNodes = Array.new;
 								if(disposed.not) { state = \ready; "Cmd-. stopped the beat. Press Play to rebuild playback.".postln };
-								stopWaiters.copy.do(_.value); stopWaiters.clear;
+								stopWaiters.copy.do(_.value); stopWaiters = Array.new;
 								app[\refresh].value
 							} };
 							quitHook = { |quittingServer| if(quittingServer === server) {
 								playToken = playToken + 1;
 								if(playRoutine.notNil) { playRoutine.stop; playRoutine = nil };
 								if(clock.notNil) { clock.stop; clock = nil };
-								rootGroup = nil; sourceGroup = nil; drumsGroup = nil; bassGroup = nil; musicGroup = nil;
+								rootGroup = nil; sourceGroup = nil; drumsGroup = nil; openHatGroup = nil; bassGroup = nil; musicGroup = nil;
 								masterGroup = nil; masterSynth = nil;
 								buses.values.do(_.free); buses = IdentityDictionary.new;
 								if(disposed.not) { state = \error; currentError = "audio server stopped; press Play after restarting it" };
-								stopWaiters.copy.do(_.value); stopWaiters.clear;
+								stopWaiters.copy.do(_.value); stopWaiters = Array.new;
 								app[\refresh].value
 							} };
 							CmdPeriod.add(cmdHook);
 							ServerQuit.add(quitHook, server);
 							if(config[\gui]) {
-								if(Platform.hasQt) { window = uiApi[\open].value(app) } { Error("Qt GUI is not available in this SuperCollider build").throw }
+								if(Platform.hasQt) { app[\openUI].value } { Error("Qt GUI is not available in this SuperCollider build").throw }
 							};
 						if(config[\autoplay] and: { stopRequested.not }) { app[\start].value };
 						app[\refresh].value
@@ -401,7 +402,6 @@ makeEngine = { |rawConfig, projectRoot, configApi, composeApi, soundApi, assetsA
 	app
 };
 
-	var api;
 api = IdentityDictionary.new;
 api[\new] = makeEngine;
 api

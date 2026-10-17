@@ -2,7 +2,7 @@
 var defaults, validate, freshSeed, config;
 defaults = IdentityDictionary.new;
 defaults[\schemaVersion] = 1;
-defaults[\generatorVersion] = "0.1.0";
+defaults[\generatorVersion] = "0.1.1";
 defaults[\seed] = nil;
 defaults[\tempo] = 140;
 defaults[\activity] = 0.50;
@@ -48,7 +48,7 @@ validate = { |input|
 		Error("latency must be between 0.02 and 2 seconds").throw
 	};
 	[\gui, \autoplay].do { |key|
-		if(output[key].isBoolean.not) { Error("% must be true or false".format(key)).throw }
+		if(output[key].isKindOf(Boolean).not) { Error("% must be true or false".format(key)).throw }
 	};
 	output
 };

@@ -6,7 +6,7 @@ views = IdentityDictionary.new;
 
 formatSnapshot = { |snapshot|
 	var stateName, seedText, active, pending, statusText, errorText;
-	stateName = snapshot[\state].asString.capitalize;
+	stateName = snapshot[\state].asString.toUpper;
 	seedText = if(snapshot[\seed].notNil) { snapshot[\seed].asString } { "pending" };
 	active = snapshot[\active];
 	pending = snapshot[\pending];
@@ -31,45 +31,46 @@ updateControl = { |controller, key, value|
 open = { |controller|
 	var w, status, tempoLabel, activityLabel, intensityLabel, tempoSlider, activitySlider, intensitySlider;
 	var playButton, stopButton, newButton, current;
+	if(Platform.hasQt.not) { Error("A Qt-enabled SuperCollider build is required to open the window.").throw };
 	if(window.notNil and: { window.isClosed.not }) { window.close };
 	activeController = controller;
-	w = Window("Chief Keef Drill Beat Generator", Rect(0, 0, 620, 300));
+	w = \Window.asClass.new("Chief Keef Drill Beat Generator", Rect(0, 0, 620, 300));
 	window = w;
 	views = IdentityDictionary.new;
-	StaticText(w, Rect(18, 10, 580, 28)).string_("Original early Chicago drill · deterministic composition · no downloads required")
-		.font_(Font(\Helvetica, 14));
-	tempoLabel = StaticText(w, Rect(20, 54, 155, 24)).string_("Tempo: 140 BPM");
-	tempoSlider = Slider(w, Rect(185, 54, 410, 24)).value_(0.5).action_({ |slider|
+	\StaticText.asClass.new(w, Rect(18, 10, 580, 28)).string_("Original early Chicago drill · deterministic composition · no downloads required")
+		.font_(\Font.asClass.new(\Helvetica, 14));
+	tempoLabel = \StaticText.asClass.new(w, Rect(20, 54, 155, 24)).string_("Tempo: 140 BPM");
+	tempoSlider = \Slider.asClass.new(w, Rect(185, 54, 410, 24)).value_(0.5).action_({ |slider|
 		var tempo;
 		tempo = (130 + (slider.value * 20)).round.asInteger;
 		tempoLabel.string = "Tempo: % BPM".format(tempo);
 		updateControl.value(controller, \tempo, tempo)
 	});
-	activityLabel = StaticText(w, Rect(20, 96, 155, 24)).string_("Activity: 0.50");
-	activitySlider = Slider(w, Rect(185, 96, 410, 24)).value_(0.5).action_({ |slider|
+	activityLabel = \StaticText.asClass.new(w, Rect(20, 96, 155, 24)).string_("Activity: 0.50");
+	activitySlider = \Slider.asClass.new(w, Rect(185, 96, 410, 24)).value_(0.5).action_({ |slider|
 		var value;
 		value = slider.value.round(0.01);
 		activityLabel.string = "Activity: %".format(value);
 		updateControl.value(controller, \activity, value)
 	});
-	intensityLabel = StaticText(w, Rect(20, 138, 155, 24)).string_("Intensity: 0.55");
-	intensitySlider = Slider(w, Rect(185, 138, 410, 24)).value_(0.55).action_({ |slider|
+	intensityLabel = \StaticText.asClass.new(w, Rect(20, 138, 155, 24)).string_("Intensity: 0.55");
+	intensitySlider = \Slider.asClass.new(w, Rect(185, 138, 410, 24)).value_(0.55).action_({ |slider|
 		var value;
 		value = slider.value.round(0.01);
 		intensityLabel.string = "Intensity: %".format(value);
 		updateControl.value(controller, \intensity, value)
 	});
-	playButton = Button(w, Rect(20, 184, 130, 36)).states_([["Play"]]).action_({
+	playButton = \Button.asClass.new(w, Rect(20, 184, 130, 36)).states_([["Play"]]).action_({
 		try { controller[\start].value } { |error| error.errorString.warn }
 	});
-	stopButton = Button(w, Rect(166, 184, 130, 36)).states_([["Stop"]]).action_({
+	stopButton = \Button.asClass.new(w, Rect(166, 184, 130, 36)).states_([["Stop"]]).action_({
 		controller[\stop].value
 	});
-	newButton = Button(w, Rect(312, 184, 160, 36)).states_([["New Beat"]]).action_({
+	newButton = \Button.asClass.new(w, Rect(312, 184, 160, 36)).states_([["New Beat"]]).action_({
 		try { controller[\newBeat].value } { |error| error.errorString.warn }
 	});
-	status = StaticText(w, Rect(20, 232, 580, 58)).string_("Preparing the audio server…")
-		.font_(Font(\Helvetica, 11));
+	status = \StaticText.asClass.new(w, Rect(20, 232, 580, 58)).string_("Preparing the audio server…")
+		.font_(\Font.asClass.new(\Helvetica, 11));
 	views[\status] = status;
 	views[\tempoLabel] = tempoLabel; views[\activityLabel] = activityLabel; views[\intensityLabel] = intensityLabel;
 	views[\tempoSlider] = tempoSlider; views[\activitySlider] = activitySlider; views[\intensitySlider] = intensitySlider;
