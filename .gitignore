@@ -1,0 +1,5 @@
+/renders/
+/test-results/
+/assets/optional/*
+!/assets/optional/.gitkeep
+*.osc
